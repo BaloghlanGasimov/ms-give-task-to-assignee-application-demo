@@ -1,7 +1,9 @@
 package com.example.msgivetaskstoassignee.service;
 
 import com.example.msgivetaskstoassignee.dao.entity.TaskEntity;
+import com.example.msgivetaskstoassignee.dao.entity.TelesaleEntity;
 import com.example.msgivetaskstoassignee.dao.repository.TaskRepository;
+import com.example.msgivetaskstoassignee.dao.repository.TelesaleRepository;
 import com.example.msgivetaskstoassignee.enums.Exceptions;
 import com.example.msgivetaskstoassignee.enums.Status;
 import com.example.msgivetaskstoassignee.exceptions.NotFoundException;
@@ -20,6 +22,7 @@ import java.util.List;
 @Service
 @Slf4j
 public class TaskService {
+    private final TelesaleRepository telesaleRepository;
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
 
@@ -39,8 +42,13 @@ public class TaskService {
     }
     public void saveTask(TaskRequestDto taskRequestDto){
         log.info("ActionLog.saveTask.start task {}",taskRequestDto);
-        System.out.println("DENEME");
         TaskEntity task = taskMapper.mapToEntity(taskRequestDto);
+        if(taskRequestDto.getTelesaleId()!=null){
+            TelesaleEntity telesale = findTelesale(taskRequestDto.getTelesaleId());
+            task.setTelesale(telesale);
+        }else {
+            task.setTelesale(setTaskToTelesale(taskRequestDto));
+        }
         task.setStatus(Status.TO_DO);
         task.setCreatedDate(LocalDateTime.now());
         taskRepository.save(task);
@@ -69,6 +77,20 @@ public class TaskService {
         log.info("ActionLog.deleteTask.end taskId {}",id);
         return taskResponseDto;
     }
+    public TelesaleEntity setTaskToTelesale(TaskRequestDto taskRequestDto){
+        if(checkSameSubjectTask(taskRequestDto)!=null){
+            return checkSameSubjectTask(taskRequestDto);
+        }else{
+            return telesaleRepository.findTelesaleWithFewestToDoTasks();
+        }
+    }
+    public TelesaleEntity checkSameSubjectTask(TaskRequestDto taskRequestDto){
+        TaskEntity task =taskRepository.findBySubject(taskRequestDto.getSubject());
+        if(task!=null){
+            return task.getTelesale();
+        }
+        return null;
+    }
     private TaskEntity findTask(Long id){
         TaskEntity task = taskRepository.findById(id).
                 orElseThrow(()->new NotFoundException(
@@ -77,5 +99,12 @@ public class TaskService {
                 ));
         return task;
     }
-
+    private TelesaleEntity findTelesale(Long id){
+        TelesaleEntity telesale = telesaleRepository.findById(id).
+                orElseThrow(()->new NotFoundException(
+                        Exceptions.TELESALE_NOT_FOUND.toString(),
+                        String.format("Error ActionLog.findTask taskId {%d}",id)
+                ));
+        return telesale;
+    }
 }

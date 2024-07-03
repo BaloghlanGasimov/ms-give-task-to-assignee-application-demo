@@ -20,16 +20,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 @NoArgsConstructor
 //@Mapper(componentModel = "spring",unmappedTargetPolicy = ReportingPolicy.IGNORE)
 @Mapper(componentModel = "spring")
-public abstract class TaskMapper {
+public abstract class TaskMapperOld {
     @Autowired
     private TelesaleRepository telesaleRepository;
 
 
-//    @Mapping(target = "telesale", ignore = true)
+    @Mapping(target = "telesale", source = "taskRequestDto", qualifiedByName = "idToTalesale")
     public abstract TaskEntity mapToEntity(TaskRequestDto taskRequestDto);
 
     public abstract TaskEntity mapToEntity(TaskResponseDto taskResponseDto);
 
     public abstract TaskResponseDto mapToRespDto(TaskEntity taskEntity);
 
+    @Named("idToTalesale")
+    protected TelesaleEntity idToTalesale(TaskRequestDto taskRequestDto) {
+        if(taskRequestDto.getTelesaleId()==null){
+            return null;
+        }
+        TelesaleEntity telesale = telesaleRepository.findById(taskRequestDto.getTelesaleId())
+                .orElseThrow(() -> new NotFoundException(
+                        Exceptions.TELESALE_NOT_FOUND.toString(),
+                        String.format("Error ActionLog.idToTalesale talesaleId {%d}", taskRequestDto.getTelesaleId()
+                        )));
+        return telesale;
+    }
 }
