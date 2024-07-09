@@ -23,4 +23,5 @@ public class TaskRequestDto {
     @NotBlank
     private String reporter;
     private Long telesaleId;
+    private Integer taskDuration;
 }

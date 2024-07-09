@@ -22,8 +22,10 @@ public class TaskEntity {
     private String reporter;
     private String description;
     private LocalDateTime createdDate;
+    private LocalDateTime expiredDate;
     @Enumerated(EnumType.STRING)
     private Status status;
+    private Integer taskDuration;
     @ManyToOne
     @JoinColumn(name = "telesale_id")
     private TelesaleEntity telesale;

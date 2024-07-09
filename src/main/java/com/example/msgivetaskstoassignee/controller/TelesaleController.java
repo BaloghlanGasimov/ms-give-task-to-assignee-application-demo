@@ -1,5 +1,6 @@
 package com.example.msgivetaskstoassignee.controller;
 
+import com.example.msgivetaskstoassignee.model.TaskResponseDto;
 import com.example.msgivetaskstoassignee.model.TelesaleRequestDto;
 import com.example.msgivetaskstoassignee.model.TelesaleResponseDto;
 import com.example.msgivetaskstoassignee.service.TelesaleService;
@@ -20,6 +21,10 @@ public class TelesaleController {
     @GetMapping("/{id}")
     public TelesaleResponseDto getTelesaleById(@PathVariable Long id){
         return telesaleService.getTelesaleById(id);
+    }
+    @PatchMapping("/{id}/tasks/{taskId}/start")
+    public void startTask(@PathVariable Long id,@PathVariable Long taskId){
+        telesaleService.startTelesaleTask(id,taskId);
     }
     @PostMapping
     public void saveTelesale(@RequestBody @Valid TelesaleRequestDto telesaleReqDto){

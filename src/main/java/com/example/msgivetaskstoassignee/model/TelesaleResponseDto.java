@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Null;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -26,7 +27,9 @@ public class TelesaleResponseDto {
         private Long id;
         private String subject;
         private String description;
-        private LocalDate createdDate;
+        private LocalDateTime createdDate;
+        private LocalDateTime expiredDate;
+        private Integer remainingTime;
         private Status status;
     }
 }

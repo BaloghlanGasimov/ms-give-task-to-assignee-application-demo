@@ -21,6 +21,8 @@ public class TaskResponseDto {
     private String description;
     private String reporter;
     private LocalDateTime createdDate;
+    private LocalDateTime expiredDate;
+    private Integer remainingTime;
     private Status status;
     private TelesaleResponseDto telesale;
 

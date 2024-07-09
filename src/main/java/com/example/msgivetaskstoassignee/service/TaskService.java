@@ -84,6 +84,16 @@ public class TaskService {
             return telesaleRepository.findTelesaleWithFewestToDoTasks();
         }
     }
+    public void checkExpireDate(){
+        List<TaskEntity> tasks = taskRepository.getTaskEntitiesByExpiredDateNotNull();
+        List<TaskEntity> taskEntities =  tasks.stream().filter((t)->t.getExpiredDate().isBefore(t.getCreatedDate())).toList();
+        taskEntities.forEach(t->t.setStatus(Status.EXPIRED));
+//        for (TaskEntity task: taskEntities) {
+//            task.setStatus(Status.EXPIRED);
+//            taskRepository.save(task);
+//        }
+        taskRepository.saveAll(taskEntities);
+    }
     public TelesaleEntity checkSameSubjectTask(TaskRequestDto taskRequestDto){
         TaskEntity task =taskRepository.findBySubject(taskRequestDto.getSubject());
         if(task!=null){
