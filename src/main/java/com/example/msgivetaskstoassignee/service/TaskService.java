@@ -47,12 +47,38 @@ public class TaskService {
             TelesaleEntity telesale = findTelesale(taskRequestDto.getTelesaleId());
             task.setTelesale(telesale);
         }else {
-            task.setTelesale(setTaskToTelesale(taskRequestDto));
+            if(checkEachTelesaleHasToDo()==null){
+                task.setTelesale(setTaskToTelesale(taskRequestDto));
+            }else{
+                task.setTelesale(checkEachTelesaleHasToDo());
+            }
         }
         task.setStatus(Status.TO_DO);
         task.setCreatedDate(LocalDateTime.now());
         taskRepository.save(task);
         log.info("ActionLog.saveTask.end task {}",taskRequestDto);
+    }
+    public TelesaleEntity checkEachTelesaleHasToDo(){
+        List<TelesaleEntity> telesaleEntities = telesaleRepository.findAll();
+//        TelesaleEntity telesale = telesaleEntities.stream().
+//                filter(
+//                t->t.getTasks().stream().anyMatch(
+//                        ta->ta.getStatus()!=Status.TO_DO)).findFirst().
+//                orElse(null);
+
+        boolean check;
+        for (TelesaleEntity telesaleEntity: telesaleEntities) {
+            check=false;
+            for (TaskEntity task : telesaleEntity.getTasks()) {
+                if(task.getStatus()==Status.TO_DO){
+                    check=true;
+                }
+            }
+            if(!check){
+                return telesaleEntity;
+            }
+        }
+        return null;
     }
     public void editTask(Long id,TaskRequestDto taskRequestDto){
         log.info("ActionLog.editTask.start taskId {} task {}",id,taskRequestDto);
@@ -88,10 +114,6 @@ public class TaskService {
         List<TaskEntity> tasks = taskRepository.getTaskEntitiesByExpiredDateNotNull();
         List<TaskEntity> taskEntities =  tasks.stream().filter((t)->t.getExpiredDate().isBefore(t.getCreatedDate())).toList();
         taskEntities.forEach(t->t.setStatus(Status.EXPIRED));
-//        for (TaskEntity task: taskEntities) {
-//            task.setStatus(Status.EXPIRED);
-//            taskRepository.save(task);
-//        }
         taskRepository.saveAll(taskEntities);
     }
     public TelesaleEntity checkSameSubjectTask(TaskRequestDto taskRequestDto){

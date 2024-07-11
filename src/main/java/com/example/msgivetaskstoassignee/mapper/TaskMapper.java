@@ -21,7 +21,7 @@ public abstract class TaskMapper {
     public abstract TaskResponseDto mapToRespDto(TaskEntity taskEntity);
 
     @Named("timeToHours")
-    public Integer timeToHours(TaskEntity task){
+    protected Integer timeToHours(TaskEntity task){
         if(task.getExpiredDate()==null){
             return null;
         }
