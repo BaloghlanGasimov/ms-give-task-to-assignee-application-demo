@@ -16,10 +16,10 @@ import java.util.List;
 @Setter
 @ToString
 public class TelesaleResponseDto {
-    @Null
     private Long id;
-    @NotNull
     private String name;
+    private String mail;
+    private String idCardImage;
     private List<TaskResponseDto> tasks;
 
     @Data

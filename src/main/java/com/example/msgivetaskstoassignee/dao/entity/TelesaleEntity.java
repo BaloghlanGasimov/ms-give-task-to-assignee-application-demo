@@ -17,6 +17,8 @@ public class TelesaleEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private String mail;
+    private String idCardImage;
     @OneToMany(mappedBy = "telesale",cascade = CascadeType.ALL)
     private List<TaskEntity> tasks;
 }

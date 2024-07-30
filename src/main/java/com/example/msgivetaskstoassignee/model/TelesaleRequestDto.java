@@ -1,5 +1,6 @@
 package com.example.msgivetaskstoassignee.model;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.*;
@@ -14,4 +15,6 @@ public class TelesaleRequestDto {
     private Long id;
     @NotNull
     private String name;
+    @Email
+    private String mail;
 }

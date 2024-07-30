@@ -10,10 +10,14 @@ import com.example.msgivetaskstoassignee.mapper.TelesaleMapper;
 import com.example.msgivetaskstoassignee.model.TaskResponseDto;
 import com.example.msgivetaskstoassignee.model.TelesaleRequestDto;
 import com.example.msgivetaskstoassignee.model.TelesaleResponseDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,6 +28,7 @@ public class TelesaleService {
     private final TaskRepository taskRepository;
     private final TelesaleRepository telesaleRepository;
     private final TelesaleMapper telesaleMapper;
+    private final ImageService imageService;
 
     public List<TelesaleResponseDto> getAllTelesales() {
         log.info("ActionLog.getAllTelesales.start");
@@ -32,6 +37,7 @@ public class TelesaleService {
         log.info("ActionLog.getAllTelesales.end");
         return telesaleRespDtos;
     }
+
     public TelesaleResponseDto getTelesaleById(Long id) {
         log.info("ActionLog.getTelesaleById.start telesaleId {}",id);
         TelesaleEntity telesale = findTelesale(id);
@@ -39,6 +45,7 @@ public class TelesaleService {
         log.info("ActionLog.getTelesaleById.end telesaleId {}",id);
         return telesaleRespDto;
     }
+
     public void startTelesaleTask(Long id, Long taskId){
         log.info("ActionLog.startTelesaleTask.start telesaleId {} taskId {}",id,taskId);
 
@@ -54,29 +61,65 @@ public class TelesaleService {
         taskRepository.save(task);
         log.info("ActionLog.startTelesaleTask.end telesaleId {} taskId {}",id,taskId);
     }
-    public void saveTelesale(TelesaleRequestDto telesaleReqDto){
+
+    public void saveTelesale(TelesaleRequestDto telesaleReqDto, MultipartFile image) {
         log.info("ActionLog.saveTelesale.start telesale {}", telesaleReqDto);
         TelesaleEntity telesale = telesaleMapper.mapToEntity(telesaleReqDto);
-        telesaleRepository.save(telesale);
+        try {
+            InputStream imageStream = image.getInputStream();
+            String filePath = imageService.uploadAndGetPathImage("telesales",image.getOriginalFilename(),imageStream);
+            telesale.setIdCardImage(filePath);
+            telesaleRepository.save(telesale);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         log.info("ActionLog.saveTelesale.end telesale {}", telesaleReqDto);
     }
-    public void editTelesale(Long id, TelesaleRequestDto telesaleReqDto){
+
+    public void editTelesale(Long id, TelesaleRequestDto telesaleReqDto,MultipartFile image){
         log.info("ActionLog.editTelesale.start telesaleId {} telesale {}",id, telesaleReqDto);
         TelesaleEntity telesale = findTelesale(id);
         if(telesaleReqDto.getName()!=null){
             telesale.setName(telesaleReqDto.getName());
         }
+        if(telesaleReqDto.getMail()!=null){
+            telesale.setMail(telesaleReqDto.getMail());
+        }
+        try {
+            if(image!=null){
+                if (telesale.getIdCardImage() != null) {
+                    InputStream imageStream = null;
+
+                        imageStream = image.getInputStream();
+
+                    imageService.deleteImage("telesales",findImageName(telesale.getIdCardImage()));
+                    String newImagePath = imageService.uploadAndGetPathImage("telesales",image.getOriginalFilename(),imageStream);
+                    telesale.setIdCardImage(newImagePath);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         telesaleRepository.save(telesale);
         log.info("ActionLog.editTelesale.end telesaleId {} telesale {}",id, telesaleReqDto);
     }
+    private String findImageName(String imagePath){
+        String fPath = imagePath.split("\\?")[0];
+        return fPath.split("telesales/")[1];
+
+    }
+
+    @Transactional
     public TelesaleRequestDto deleteTelesale(Long id){
         log.info("ActionLog.deleteTelesale.start telesaleId {}",id);
         TelesaleEntity telesale = findTelesale(id);
         TelesaleRequestDto telesaleReqDto = telesaleMapper.mapToReqDto(telesale);
         telesaleRepository.deleteById(id);
+        imageService.deleteImage("telesales",findImageName(telesale.getIdCardImage()));
         log.info("ActionLog.deleteTelesale.end telesaleId {}",id);
         return telesaleReqDto;
     }
+
     private TelesaleEntity findTelesale(Long id) {
         TelesaleEntity telesale = telesaleRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(

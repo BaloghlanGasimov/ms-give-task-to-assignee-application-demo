@@ -14,12 +14,8 @@ public class CheckTaskExpireDateSchedule {
     @Scheduled(cron = "0 1 * * * *")
     public void checkExpireDate(){
         log.info("ActionLog.checkExpireDate.start");
-        System.out.println("it's working");
         taskService.checkExpireDate();
-
-
         log.info("ActionLog.checkExpireDate.end");
-
     }
 
 }
