@@ -77,7 +77,7 @@ public class TelesaleService {
         log.info("ActionLog.deleteTelesale.end telesaleId {}",id);
         return telesaleReqDto;
     }
-    private TelesaleEntity findTelesale(Long id) {
+    public TelesaleEntity findTelesale(Long id) {
         TelesaleEntity telesale = telesaleRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(
                         Exceptions.TELESALE_NOT_FOUND.toString(),

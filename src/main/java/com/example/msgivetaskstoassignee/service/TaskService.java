@@ -60,12 +60,6 @@ public class TaskService {
     }
     public TelesaleEntity checkEachTelesaleHasToDo(){
         List<TelesaleEntity> telesaleEntities = telesaleRepository.findAll();
-//        TelesaleEntity telesale = telesaleEntities.stream().
-//                filter(
-//                t->t.getTasks().stream().anyMatch(
-//                        ta->ta.getStatus()!=Status.TO_DO)).findFirst().
-//                orElse(null);
-
         boolean check;
         for (TelesaleEntity telesaleEntity: telesaleEntities) {
             check=false;
