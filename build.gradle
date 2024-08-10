@@ -48,7 +48,7 @@ dependencies {
     implementation 'io.github.benas:random-beans:3.7.0'
 
     //security
-    implementation 'org.springframework.boot:spring-boot-starter-security:3.3.1'
+//    implementation 'org.springframework.boot:spring-boot-starter-security:3.3.1'
 
 
 }
